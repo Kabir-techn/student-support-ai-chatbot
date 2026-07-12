@@ -142,6 +142,25 @@ def dedupe_sources(chunks: list[dict]) -> list[dict]:
     return sources
 
 
+def clean_excerpt(text: str, max_chars: int = 500) -> str:
+    """
+    Tidy a raw retrieved chunk for direct display in extractive (no-LLM) mode:
+    collapse stray whitespace/newlines from PDF extraction, and trim to a
+    sentence boundary near max_chars so the answer doesn't end mid-sentence.
+    """
+    normalized = " ".join(text.split())
+    if len(normalized) <= max_chars:
+        return normalized
+
+    truncated = normalized[:max_chars]
+    last_period = truncated.rfind(". ")
+    if last_period > max_chars * 0.4:  # only trim to sentence boundary if it's not too aggressive
+        truncated = truncated[: last_period + 1]
+    else:
+        truncated = truncated.rstrip() + "..."
+    return truncated
+
+
 def answer_question(
     question: str,
     vector_store: VectorStore,
@@ -169,7 +188,7 @@ def answer_question(
         # No external LLM: return a clearly-labelled extractive answer built
         # directly from the top chunk(s), still grounded and cited.
         best = retrieved[0]
-        answer_text = EXTRACTIVE_FALLBACK_TEMPLATE.format(context=best["text"])
+        answer_text = EXTRACTIVE_FALLBACK_TEMPLATE.format(excerpt=clean_excerpt(best["text"]))
     else:
         prompt = build_rag_prompt(history=history_text, context=context, question=question)
         provider = get_llm_provider()
@@ -177,6 +196,6 @@ def answer_question(
             answer_text = provider.generate(prompt)
         except Exception as exc:  # noqa: BLE001
             logger.error("LLM generation failed (%s); using extractive fallback", exc)
-            answer_text = EXTRACTIVE_FALLBACK_TEMPLATE.format(context=retrieved[0]["text"])
+            answer_text = EXTRACTIVE_FALLBACK_TEMPLATE.format(excerpt=clean_excerpt(retrieved[0]["text"]))
 
     return RAGResult(answer=answer_text, confidence=confidence, sources=sources, is_fallback=False)

@@ -73,8 +73,8 @@ class Settings(BaseSettings):
     EMBEDDING_DIM: int = 384
 
     # ---------------- RAG / Retrieval ----------------
-    CHUNK_SIZE: int = 800
-    CHUNK_OVERLAP: int = 120
+    CHUNK_SIZE: int = 400
+    CHUNK_OVERLAP: int = 60
     TOP_K: int = 4
     CONFIDENCE_THRESHOLD: float = 0.45  # below this -> "not confident" fallback
     FAISS_INDEX_NAME: str = "college_index"
@@ -92,8 +92,11 @@ class Settings(BaseSettings):
     # ---------------- Response behaviour ----------------
     RESPONSE_TIMEOUT_SECONDS: int = 3
     NOT_CONFIDENT_MESSAGE: str = (
-        "I am not confident enough to answer this question. "
-        "Please contact Student Support at support@college.edu."
+        "I couldn't find anything about that in the college's documents, so I don't "
+        "want to guess. I can help with admissions, fees, scholarships, hostel, "
+        "library, placements, exams, attendance, academic calendar, and similar "
+        "student support topics — try rephrasing, or contact Student Support at "
+        "support@college.edu for anything else."
     )
 
     # ---------------- Logging ----------------

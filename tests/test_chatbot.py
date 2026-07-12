@@ -34,7 +34,7 @@ def test_chat_falls_back_when_out_of_domain(temp_project_dirs):
     bot = Chatbot()
     response = bot.chat("What is the airspeed velocity of an unladen swallow?")
     assert response.answered_by == "fallback"
-    assert "not confident" in response.answer.lower()
+    assert "couldn't find anything" in response.answer.lower()
 
 
 def test_chat_reuses_session_id_across_turns(temp_project_dirs):

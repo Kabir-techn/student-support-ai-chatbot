@@ -54,12 +54,11 @@ NEW QUESTION:
 
 STANDALONE QUESTION:"""
 
-EXTRACTIVE_FALLBACK_TEMPLATE = """Based on the most relevant information I found:
+EXTRACTIVE_FALLBACK_TEMPLATE = """{excerpt}
 
-{context}
-
-(This is a direct excerpt from college documents. For a more detailed or \
-personalized answer, please contact Student Support.)"""
+*(This is a direct excerpt from college documents — no AI model is configured. \
+For a more conversational answer, or if this doesn't fully answer your \
+question, please contact Student Support.)*"""
 
 
 def build_rag_prompt(history: str, context: str, question: str) -> str:
