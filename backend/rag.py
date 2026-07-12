@@ -65,16 +65,38 @@ class OllamaProvider(LLMProvider):
         import requests  # local import: only needed for this provider
 
         self._requests = requests
-        self.base_url = settings.OLLAMA_BASE_URL
+        self.base_url = settings.OLLAMA_BASE_URL.rstrip("/")
 
     def generate(self, prompt: str) -> str:
-        resp = self._requests.post(
-            f"{self.base_url}/api/generate",
-            json={"model": settings.OLLAMA_MODEL, "prompt": prompt, "stream": False},
-            timeout=settings.RESPONSE_TIMEOUT_SECONDS * 5,
-        )
+        try:
+            resp = self._requests.post(
+                f"{self.base_url}/api/generate",
+                json={"model": settings.OLLAMA_MODEL, "prompt": prompt, "stream": False},
+                timeout=settings.OLLAMA_TIMEOUT_SECONDS,
+            )
+        except self._requests.exceptions.ConnectionError as exc:
+            raise RuntimeError(
+                f"Could not reach Ollama at {self.base_url}. Is it running? "
+                f"Start it with `ollama serve` (or the Ollama desktop app)."
+            ) from exc
+        except self._requests.exceptions.Timeout as exc:
+            raise RuntimeError(
+                f"Ollama did not respond within {settings.OLLAMA_TIMEOUT_SECONDS}s. "
+                f"The model may still be loading into memory on first use — try again shortly."
+            ) from exc
+
+        if resp.status_code == 404:
+            raise RuntimeError(
+                f"Ollama model '{settings.OLLAMA_MODEL}' not found. "
+                f"Pull it first with: ollama pull {settings.OLLAMA_MODEL}"
+            )
         resp.raise_for_status()
-        return resp.json().get("response", "").strip()
+
+        data = resp.json()
+        text = data.get("response", "").strip()
+        if not text:
+            raise RuntimeError(f"Ollama returned an empty response: {data}")
+        return text
 
 
 class LocalExtractiveProvider(LLMProvider):

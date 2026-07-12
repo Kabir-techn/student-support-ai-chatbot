@@ -19,6 +19,7 @@ transformers>=4.42.0
 
 # ---- Optional LLM providers ----
 openai>=1.35.0
+requests>=2.32.0
 
 # ---- Document parsing ----
 pypdf>=4.2.0

@@ -65,6 +65,7 @@ class Settings(BaseSettings):
     OPENAI_MODEL: str = "gpt-4o-mini"
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3.1"
+    OLLAMA_TIMEOUT_SECONDS: int = 90  # local inference is much slower than cloud APIs, especially on CPU
     LLM_TEMPERATURE: float = 0.2
     LLM_MAX_TOKENS: int = 512
 

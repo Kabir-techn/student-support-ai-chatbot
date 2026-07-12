@@ -142,13 +142,31 @@ OPENAI_MODEL=gpt-4o-mini
 **Ollama (self-hosted, free):**
 ```bash
 # install & run Ollama, then pull a model
-ollama pull llama3.1
+ollama pull llama3
 
 # in .env
 LLM_PROVIDER=ollama
 OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.1
+OLLAMA_MODEL=llama3
+OLLAMA_TIMEOUT_SECONDS=90
 ```
+
+Verify Ollama is reachable before starting the app:
+```bash
+curl http://localhost:11434/api/tags   # should list your installed models
+```
+
+If the chatbot silently falls back to raw excerpts even with `LLM_PROVIDER=ollama`
+set, check the backend logs (`logs/app.log` or the terminal running `uvicorn`)
+for a line like `LLM generation failed (...); using extractive fallback` — the
+error message tells you exactly what went wrong:
+- *"Could not reach Ollama"* → Ollama isn't running; start it with `ollama serve`
+  or open the Ollama desktop app.
+- *"model not found"* → `OLLAMA_MODEL` in `.env` doesn't match an installed
+  model; run `ollama list` to see exact names, or `ollama pull <name>`.
+- *"did not respond within Ns"* → the model is still loading into memory on
+  first use (common on CPU); try the question again, or raise
+  `OLLAMA_TIMEOUT_SECONDS`.
 
 ---
 
