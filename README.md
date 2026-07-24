@@ -6,8 +6,7 @@ placements, exams, attendance, academic calendar, and more — grounded in
 official college documents, with source citations and a confidence score on
 every answer.
 
-Built for the **IBM AI Internship capstone**, but structured as a real,
-deployable product.
+
 
 ---
 
